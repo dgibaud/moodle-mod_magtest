@@ -37,6 +37,9 @@ class mod_magtest_mod_form extends moodleform_mod {
 
         $mform =& $this->_form;
 
+        // echo"<pre>";print_r($this);echo"</pre>";
+        // echo"<br>";print_object($this->context);
+
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         $mform->addElement('text', 'name', get_string('name'), array('size'=>'64'));
@@ -77,7 +80,8 @@ class mod_magtest_mod_form extends moodleform_mod {
         $mform->addElement('checkbox', 'allowreplay', get_string('allowreplay', 'magtest'));
         $mform->addHelpButton('allowreplay', 'pagesize', 'magtest');
 
-        $mform->addElement('editor', 'result', get_string('resulttext', 'magtest'));
+        $fileoptions = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' =>  $this->context);
+        $mform->addElement('editor', 'result', get_string('resulttext', 'magtest'), null, $fileoptions);
         $mform->setType('result', PARAM_RAW);
 
         $this->standard_coursemodule_elements();
