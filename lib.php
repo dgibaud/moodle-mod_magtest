@@ -53,26 +53,51 @@ function magtest_supports($feature) {
 }
 
 /**
- * Given an object containing all the necessary data, 
- * (defined by the form in mod.html) this function 
- * will create a new instance and return the id number 
+ * Given an object containing all the necessary data,
+ * (defined by the form in mod.html) this function
+ * will create a new instance and return the id number
  * of the new instance.
  *
- * @param object $instance An object from the form in mod.html
+ * @param object $instance An object from the form in mod_form.php
  * @return int The id of the newly inserted magtest record
  **/
 function magtest_add_instance($magtest) {
     global $DB;
 
     $magtest->timemodified = time();
+    $magtest->id = "";
 
     if (!empty($magtest->singlechoice)) {
         $magtest->weighted = 1;
     }
 
-    $return = $DB->insert_record('magtest', $magtest);
+    // Insert the new magtest instance in DB
+    $magtestId = $DB->insert_record("magtest", $magtest);
+    $magtest->id = $magtestId;
 
-    return $return;
+    if (!isset($magtest->coursemodule)) {
+        $cm = get_coursemodule_from_id('magtest', $magtest->id);
+        $magtest->coursemodule = $cm->id;
+    }
+    $context = context_module::instance($magtest->coursemodule);
+    $editoroptions = magtest_getEditorOptions($context);
+
+    // Process the custom wysiwyg editor in result_editor
+    if ($draftitemid = $magtest->result_editor['itemid']) {
+        $magtest->result = file_save_draft_area_files(
+                $draftitemid,
+                $context->id,
+                'mod_magtest',
+                'result',
+                0,
+                $editoroptions,
+                $magtest->result_editor['text']);
+        $magtest->resultformat = $magtest->result_editor['format'];
+    }
+
+    $DB->update_record('magtest', $magtest);
+
+    return $magtestId;
 }
 
 function pix_url() {
@@ -80,26 +105,29 @@ function pix_url() {
 }
 
 /**
- * Given an object containing all the necessary data, 
- * (defined by the form in mod.html) this function 
+ * Given an object containing all the necessary data,
+ * (defined by the form in mod.html) this function
  * will update an existing instance with new data.
  *
- * @param object $instance An object from the form in mod.html
+ * @param object $instance An object from the form in mod_form.php
  * @return boolean Success/Fail
  */
 function magtest_update_instance($magtest) {
     global $DB;
 
+    $magtest->timemodified = time();
+    $magtest->id = $magtest->instance;
+
+    $context = context_module::instance($magtest->coursemodule);
+    $editoroptions = magtest_getEditorOptions($context);
+
     $oldmode = $DB->get_field('magtest', 'singlechoice', array('id' => $magtest->instance));
 
-    // If changing mode, we need delete all previous user dataas they are NOT relevant any more.
+    // If changing mode, we need delete all previous user datas they are NOT relevant any more.
     // @TODO : add notification in mod_form to alert users...
     if ($oldmode != @$magtest->singlechoice) {
         $DB->delete_records('magtest_useranswer', array('magtestid' => $magtest->instance));
     }
-    
-    $magtest->timemodified = time();
-    $magtest->id = $magtest->instance;
 
     if (!empty($magtest->singlechoice)) {
         $magtest->weighted = 1;
@@ -112,13 +140,26 @@ function magtest_update_instance($magtest) {
     if (!isset($magtest->weighted)) $magtest->weighted = 0;
     if (!isset($magtest->singlechoice)) $magtest->singlechoice = 0;
 
+    // Process the custom wysiwyg editor in result_editor
+    if ($draftitemid = $magtest->result_editor['itemid']) {
+        $magtest->result = file_save_draft_area_files(
+                $draftitemid,
+                $context->id,
+                'mod_magtest',
+                'result',
+                0,
+                $editoroptions,
+                $magtest->result_editor['text']);
+        $magtest->resultformat = $magtest->result_editor['format'];
+    }
+
     return $DB->update_record('magtest', $magtest);
 }
 
 /**
- * Given an ID of an instance of this module, 
- * this function will permanently delete the instance 
- * and any data that depends on it. 
+ * Given an ID of an instance of this module,
+ * this function will permanently delete the instance
+ * and any data that depends on it.
  *
  * @param int $id Id of the module instance
  * @return boolean Success/Failure
@@ -154,7 +195,7 @@ function magtest_delete_instance($id) {
 }
 
 /**
- * Return a small object with summary information about what a 
+ * Return a small object with summary information about what a
  * user has done with a given particular instance of this module
  * Used for user activity reports.
  * $return->time = the time they did it
@@ -178,7 +219,7 @@ function magtest_user_outline($course, $user, $mod, $magtest) {
 }
 
 /**
- * Print a detailed representation of what a user has done with 
+ * Print a detailed representation of what a user has done with
  * a given particular instance of this module, for user activity reports.
  *
  * @return boolean
@@ -218,7 +259,7 @@ function magtest_print_recent_activity($course, $isteacher, $timestart) {
 /**
  * Function to be run periodically according to the moodle cron
  * This function searches for things that need to be done, such
- * as sending out mail, toggling flags etc ... 
+ * as sending out mail, toggling flags etc ...
  *
  * @uses $CFG
  * @return boolean
@@ -233,7 +274,7 @@ function magtest_cron () {
 /**
  * Must return an array of grades for a given instance of this module,
  * indexed by user.  It also returns a maximum allowed grade.
- * 
+ *
  * Example:
  *    $return->grades = array of grades;
  *    $return->maxgrade = maximum allowed grade;
@@ -456,7 +497,7 @@ function magtest_print_overview($courses, &$htmlarray) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-/// Any other magtest functions go here.  Each of them must have a name that 
+/// Any other magtest functions go here.  Each of them must have a name that
 /// starts with magtest_
 
 /**
@@ -525,4 +566,16 @@ function magtest_dbcleaner_add_keys() {
     );
 
     return $keys;
+}
+
+
+/**
+ * This gets an array with default options for the editor
+ *
+ * @return array The options
+ */
+function magtest_getEditorOptions($context) {
+    return array('maxfiles' => EDITOR_UNLIMITED_FILES,
+                'trusttext'=> true,
+                'context' => $context);
 }
