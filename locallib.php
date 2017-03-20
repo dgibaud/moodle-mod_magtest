@@ -42,10 +42,10 @@ function magtest_get_questions($magtestid) {
 
     $questions = $DB->get_records('magtest_question', array('magtestid' => $magtestid), 'sortorder');
     if ($questions) {
-        $answers = $DB->get_records('magtest_answer', array('magtestid' => $magtestid));    
+        $answers = $DB->get_records('magtest_answer', array('magtestid' => $magtestid));
         foreach ($answers as $answer) {
-            $questions[$answer->questionid]->answers[$answer->id] = $answer; 
-        } 
+            $questions[$answer->questionid]->answers[$answer->id] = $answer;
+        }
     }
     return $questions;
 }
@@ -72,7 +72,7 @@ function magtest_get_question($qid) {
  * gets answers for a question in several modes
  *
  * @param int $magtestid
- * @param int $order 
+ * @param int $order
  * @param boolean $shuffle true if you want change the order of answer
  * @return object
  *
@@ -94,7 +94,7 @@ function magtest_get_answers(&$question, $order = 1, $shuffle = false) {
 
 /**
  * Get all the categories of a magtest.
- * Return an array of object categories 
+ * Return an array of object categories
  *
  * @param int $magtestid
  * @return array
@@ -119,13 +119,13 @@ function magtest_get_categories($magtestid) {
 function magtest_get_answer_cat($answer) {
     global $DB;
 
-    $categorie = $DB->get_record('magtest_category', array('id' => $answer->categoryid));     
+    $categorie = $DB->get_record('magtest_category', array('id' => $answer->categoryid));
     return $categorie;
 }
 
 /**
  * Get all the answers in a magtest for one user.
- * Return an array of object useranswers 
+ * Return an array of object useranswers
  *
  * @param int $magtestid
  * @param array $forusers if set to null, will retrieve answers for all users
@@ -184,7 +184,7 @@ function magtest_get_next_questionset(&$magtest, $currentpage) {
     } else {
         $questionset = $DB->get_records('magtest_question', array('magtestid' => $magtest->id), 'sortorder');
     }
-  
+
     if ($questionset) {
         foreach($questionset as $key => $question) {
             $questionset[$key]->answers = $DB->get_records('magtest_answer', array('questionid' => $question->id));
@@ -308,18 +308,22 @@ function magtest_get_unsubmitted_users(&$magtest, &$users) {
             u.id,
             u.firstname,
             u.lastname,
+            u.firstnamephonetic,
+            u.lastnamephonetic,
+            u.middlename,
+            u.alternatename,
             u.email,
             u.emailstop,
             u.picture,
             u.mnethostid,
             u.imagealt
-        FROM 
+        FROM
             {user} u
-        WHERE 
+        WHERE
             u.id IN ('$userlist') AND
-            u.id NOT IN ( 
+            u.id NOT IN (
                 SELECT DISTINCT
-                    userid 
+                    userid
                 FROM
                     {magtest_useranswer}
                 WHERE

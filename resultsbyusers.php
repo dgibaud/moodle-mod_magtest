@@ -18,7 +18,7 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Prints results of the test for the user
- * 
+ *
  * @package    mod_magtest
  * @category   mod
  * @author     Valery Fremaux <valery.fremaux@club-internet.fr>
@@ -35,8 +35,11 @@ if ($action) {
 
 // Setup group state regarding the user.
 
-$groupmode = groupmode($course, $cm);
-$changegroupid = optional_param('group', -1, PARAM_INT);
+// $groupmode = groupmode($course, $cm);
+$groupmode = groups_get_activity_groupmode($cm);
+// Get the current group id.
+// $changegroupid = optional_param('group', -1, PARAM_INT);
+$currentgroupid = groups_get_activity_group($cm);
 
 if (has_capability('moodle/site:accessallgroups', $context)) {
     $groups = groups_get_all_groups($COURSE->id);
@@ -55,10 +58,12 @@ if ($groups) {
  * Note that usemakegroups is not compatible with course groups as it is used to generate
  * moodle groups in a course and needs having no groups at start.
  */
+
+$userFields = "u.id, firstname, lastname, firstnamephonetic, lastnamephonetic, middlename, alternatename, picture, email, imagealt";
 if ($groupmode == NOGROUPS || $magtest->usemakegroups) {
-    $users = get_users_by_capability($context, 'mod/magtest:doit', 'u.id,firstname,lastname,picture,email,imagealt', 'lastname');
+    $users = get_users_by_capability($context, 'mod/magtest:doit', $userFields, 'lastname');
 } else {
-    $users = get_users_by_capability($context, 'mod/magtest:doit', 'u.id,firstname,lastname,picture,email,imagealt', 'lastname', '', '', $currentgroupid);
+    $users = get_users_by_capability($context, 'mod/magtest:doit', $userFields, 'lastname', '', '', $currentgroupid);
 }
 
 // Get missing users.
@@ -114,7 +119,7 @@ foreach ($users as $user) {
 
 // Make table head.
 
-echo '<center>';
+echo '<div style="text-align:center;">';
 $table = new html_table();
 $table->head[] = '<b>'.get_string('users').'</b>';
 $table->head[] = '<b>'.get_string('results', 'magtest').'</b>';
@@ -164,4 +169,4 @@ if (!empty($missings)) {
     }
     echo html_writer::table($table);
 }
-echo '</center>';
+echo '</div>';

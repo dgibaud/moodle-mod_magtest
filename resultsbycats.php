@@ -22,7 +22,7 @@ defined('MOODLE_INTERNAL') || die();
  * @package    mod_magtest
  * @category   mod
  * @author     Valery Fremaux <valery.fremaux@club-internet.fr>
- * @contributors   Etienne Roze
+ * @contributors   Etienne Roze, Didier Gibaud
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL
  * @copyright  (C) 1999 onwards Martin Dougiamas  http://dougiamas.com
  */
@@ -38,8 +38,9 @@ if (!defined('MOODLE_INTERNAL')) {
 }
 
 // Setup group state regarding the user.
-$groupmode = groupmode($course, $cm);
-$changegroupid = optional_param('group', -1, PARAM_INT);
+// $groupmode = groupmode($course, $cm);
+$groupmode = groups_get_activity_groupmode($cm);
+$currentgroupid = optional_param('group', -1, PARAM_INT);
 
 if (has_capability('moodle/site:accessallgroups', $context)) {
     $groups = groups_get_all_groups($COURSE->id);

@@ -27,7 +27,7 @@ require_once($CFG->dirroot.'/mod/magtest/lib.php');
 require_once($CFG->dirroot.'/mod/magtest/locallib.php');
 
 $id = optional_param('id', 0, PARAM_INT); // Course Module ID, or
-$a = optional_param('a', 0, PARAM_INT); // Magtest ID
+$magtestId = optional_param('a', 0, PARAM_INT); // Magtest ID
 $view = optional_param('view',@$SESSION->view, PARAM_ACTION); // View.
 $page = optional_param('page',@$SESSION->page, PARAM_ACTION); // Page.
 $action = optional_param('what', '', PARAM_RAW); // Command.
@@ -51,7 +51,7 @@ if ($id) {
         print_error ('invalidcoursemodule');
     }
 } else {
-    if (!$magtest = $DB->get_record('magtest', array('id' => $a))) {
+    if (!$magtest = $DB->get_record('magtest', array('id' => $magtestId))) {
         print_error ('invalidcoursemodule');
     }
 

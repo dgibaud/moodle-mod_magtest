@@ -34,6 +34,8 @@ class ImportQuestionsForm extends moodleform {
 
         $mform = $this->_form;
 
+        $mform->addElement('header', 'header0', get_string('import', 'magtest'));
+
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
 

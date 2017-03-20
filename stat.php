@@ -16,16 +16,16 @@
 
 /**
  * Prints details stats about all answers
- * 
+ *
  * @package    mod-magtest
  * @category   mod
  * @author     Valery Fremaux <valery.fremaux@club-internet.fr>
- * @contributors   Etienne Roze
+ * @contributors   Etienne Roze, Didier Gibaud
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL
  * @copyright  (C) 1999 onwards Martin Dougiamas  http://dougiamas.com
  */
 
-require_once($CFG->libdir.'/tablelib.php');
+require_once($CFG->libdir.'/'.'tablelib.php');
 
 if (!defined('MOODLE_INTERNAL')) {
     die('You cannot use this script that way');
@@ -35,11 +35,14 @@ if (!(isset($id) and $view === 'stat' && has_capability('mod/magtest:viewgeneral
     die('You cannot use this script that way');
 }
 
-$groupmode = groupmode($course, $cm);
+// $groupmode = groupmode($course, $cm);
+$groupmode = groups_get_activity_groupmode($cm);
 
 // Old mode but is the one that works !!
 
-$changegroupid = optional_param('group', -1, PARAM_INT);
+// Get the current group id.
+// $changegroupid = optional_param('group', -1, PARAM_INT);  // Group ID
+$currentgroupid = groups_get_activity_group($cm);
 
 if ($groupmode == NOGROUPS || $magtest->usemakegroups) {
     $users = get_users_by_capability($context, 'mod/magtest:doit', 'u.id,firstname,lastname,picture,email', 'lastname');
@@ -58,6 +61,8 @@ $categories = magtest_get_categories($magtest->id);
 $questions = magtest_get_questions($magtest->id);
 $count_cat = array();
 $nb_total = 0;
+
+// Compute answers by category.
 foreach ($usersanswers as $useranswer) {
     if (!$magtest->singlechoice) {
         $question = $questions[$useranswer->questionid];
@@ -71,15 +76,16 @@ foreach ($usersanswers as $useranswer) {
     } else {
         // Counts how many hits on this question.
         $question = $questions[$useranswer->questionid];
+        $count_cat[$useranswer->questionid] = isset($count_cat[$useranswer->questionid]) ? $count_cat[$useranswer->questionid] : 0;
         if ($useranswer->answerid == 1){
-            $count_cat[$useranswer->questionid] = @$count_cat[$useranswer->questionid] + 1;
+            // $count_cat[$useranswer->questionid] = @$count_cat[$useranswer->questionid] + 1;
+            $count_cat[$useranswer->questionid]++;
         }
         $count_users[$useranswer->userid] = 1;
     }
 }
 
-// Compute unanswered.
-
+// Compute unanswered questions.
 $candidates = count($users);
 foreach ($questions as $id => $question) {
     if ($magtest->singlechoice) {
@@ -128,7 +134,7 @@ if ($magtest->singlechoice) {
     }
 }
 
-echo '<center>';
+echo '<div style=\'text-align:center;\'>';
 echo '<b>'.get_string('noanswerusers', 'magtest').':</b> '.$neveranswered;
 echo html_writer::table($table);
-echo '</center>';
+echo '</div>';

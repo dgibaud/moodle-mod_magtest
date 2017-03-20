@@ -22,7 +22,7 @@ defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
  * @package mod_magtest
  * @category mod
  * @author Valery Fremaux
- * @contributors Etienne Roze
+ * @contributors Etienne Roze, Didier Gibaud
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
  */
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
