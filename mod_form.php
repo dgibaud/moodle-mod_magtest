@@ -55,6 +55,7 @@ class mod_magtest_mod_form extends moodleform_mod {
 
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'timinghdr', get_string('availability'));
+        $mform->setExpanded('timinghdr');
 
         $startdatearray[] = &$mform->createElement('date_time_selector', 'starttime', '');
         $startdatearray[] = &$mform->createElement('checkbox', 'starttimeenable', '');
@@ -73,6 +74,7 @@ class mod_magtest_mod_form extends moodleform_mod {
 
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'magtesthdr', get_string('questionandsubmission', 'magtest'));
+        $mform->setExpanded('magtesthdr');
 
         $mform->addElement('checkbox', 'singlechoice', get_string('singlechoice', 'magtest'));
         $mform->addHelpButton('singlechoice', 'singlechoice', 'magtest');
@@ -93,6 +95,7 @@ class mod_magtest_mod_form extends moodleform_mod {
 
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'aftersubmithdr', get_string('after_submit', 'magtest'));
+        $mform->setExpanded('aftersubmithdr');
 
         $mform->addElement('editor', 'result_editor', get_string('resulttext', 'magtest'), null, $editoroptions);
         $mform->setType('result_editor', PARAM_RAW);

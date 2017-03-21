@@ -31,17 +31,17 @@ defined('MOODLE_INTERNAL') || die();
 $renderer = $PAGE->get_renderer('mod_magtest');
 
 if ($magtest->starttimeenable && time() <= $magtest->starttime) {
-    echo '<center>';
+    echo '<div style="text-align:center">';
     echo $OUTPUT->box(get_string('notopened', 'magtest'), 'errorbox');
-    echo '</center>';
+    echo '</div>';
     return;
 }
 
 if (!magtest_test_configuration($magtest)) {
-    echo '<center>';
+    echo '<div style="text-align:center">';
     echo $OUTPUT->box(get_string('testnotallok', 'magtest'));
     echo $OUTPUT->continue_button($CFG->wwwroot.'/course/view.php?id='.$course->id);
-    echo '</center>';
+    echo '</div>';
     return;
 }
 
@@ -73,12 +73,12 @@ if (!$nextset) {
     return;
 }
 
-// Keep this after test finished test, to allow students that have 
+// Keep this after test finished test, to allow students that have
 // completed the test to see results.
 if ($magtest->endtimeenable && time() >= $magtest->endtime) {
-    echo '<center>';
+    echo '<div style="text-align:center">';
     echo $OUTPUT->box(get_string('closed', 'magtest'), 'errorbox');
-    echo '</center>';
+    echo '</div>';
     return;
 }
 $categories = magtest_get_categories($magtest->id);
@@ -86,10 +86,9 @@ $categories = magtest_get_categories($magtest->id);
 echo $OUTPUT->heading(get_string('answerquestions', 'magtest').format_string($magtest->name).' : '.($currentpage + 1).'/'.$allpages);
 
 // print a description on first page.
-if (!empty($magtest->description) && $currentpage == 1) {
-    echo '<br/>';
-    echo $OUTPUT->box(format_string($magtest->description));
+if (!empty($magtest->intro) && $currentpage == 0) {
+    // echo '<br/>';
+    echo $OUTPUT->box($magtest->intro);
 }
 
 echo $renderer->make_test($magtest, $cm, $context, $nextset, $categories);
-
